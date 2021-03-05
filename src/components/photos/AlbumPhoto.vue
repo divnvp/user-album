@@ -19,8 +19,8 @@
             class="cursor-pointer">
           <td>
             <img :src="photo.thumbnailUrl"
-                 @click="showModal = true">
-            <info-modal-photo v-show="showModal">
+                 @click="showModal = photo.id">
+            <info-modal-photo v-if="showModal === photo.id">
               <template #header>
                 <h3>{{photo.id}}</h3>
               </template>
@@ -29,7 +29,7 @@
                 <img :src="photo.url">
               </template>
               <template #footer>
-                <button @click="showModal = false">
+                <button @click="showModal = null">
                   X
                 </button>
               </template>
@@ -51,7 +51,61 @@
   </div>
 </template>
 
-<script src="./AlbumPhoto.ctrl.js"></script>
+<script>
+import InfoModalPhoto from './InfoModalPhoto'
+import {getPhotos} from '@/services/api.service'
+export default {
+  name: 'AlbumPhoto',
+  components: {
+    InfoModalPhoto,
+  },
+
+  data () {
+    return {
+      albumId: this.$route.params.albumId,
+      photos: [],
+      pages: [],
+      currentPage: 1,
+      rowsPerPage: 9,
+      showModal: null,
+    }
+  },
+
+  computed: {
+    displayedPhotos () {
+      return this.paginate(this.photos);
+    }
+  },
+
+  watch: {
+    photos () {
+      this.calculatePages();
+    }
+  },
+
+  async created() {
+    // this.photos.url = this.$route.query.fullscreenUrl;
+    this.photos = await getPhotos(this.$route.params.albumId, this.photos.url);
+
+  },
+
+  methods: {
+    calculatePages () {
+      let numberOfPages = Math.ceil(this.photos.length / this.rowsPerPage);
+      for (let index = 1; index <= numberOfPages; index++) {
+        this.pages.push(index);
+      }
+    },
+    paginate (users) {
+      let page = this.currentPage;
+      let perPage = this.rowsPerPage;
+      let from = (page * perPage) - perPage;
+      let to = (page * perPage);
+      return  users.slice(from, to);
+    }
+  },
+}
+</script>
 
 <style>
 table {

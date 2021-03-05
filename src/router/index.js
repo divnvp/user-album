@@ -13,12 +13,12 @@ const routes = [
   {
     path: `/:userId/albums`,
     name: 'Albums',
-    component: () => import('../components/albums/UserAlbum'),
+    component: () => import('../components/albums/UserAlbum.vue'),
   },
   {
     path: `/albums/:albumId`,
     name: 'Photos',
-    component: () => import('../components/photos/AlbumPhoto'),
+    component: () => import('../components/photos/AlbumPhoto.vue'),
   },
 ]
 
