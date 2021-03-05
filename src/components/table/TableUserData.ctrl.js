@@ -2,16 +2,41 @@ export default {
     name: 'TableUsersData',
     data: function () {
         return {
+            search: '',
             users: [],
             pages: [],
-            currentPage: 0,
+            currentPage: 1,
             rowsPerPage: 4,
+            sort: {
+                key: '',
+                isAsc: false
+            },
         }
     },
 
     computed: {
-        getUsersForCurrentPage: function () {
-            return this.users.slice(this.currentPage, this.rowsPerPage)
+        displayedUsers () {
+            return this.pagiabledUsers.filter(users => {
+                return users.name.toLowerCase().includes(this.search.toLowerCase())
+                }).sort((a, b) => {
+                a = a[this.sort.key]
+                b = b[this.sort.key]
+
+                return (a === b ? 0 : a > b ? 1 : -1) * (this.sort.isAsc ? 1 : -1)
+            });
+        },
+        pagiabledUsers () {
+            let page = this.currentPage;
+            let perPage = this.rowsPerPage;
+            let from = (page * perPage) - perPage;
+            let to = (page * perPage);
+            return this.users.slice(from, to);
+        }
+    },
+
+    watch: {
+        users () {
+            this.calculatePages();
         }
     },
 
@@ -21,27 +46,33 @@ export default {
                 .then(response => response.json())
                 .then(json => {
                     this.users = json
-                    console.log(this.users)
-                    let nums = 0;
-                    for (let i = 0; i < this.users.length; i++) {
-                        this.pages = nums++;
-                    }
                 })
                 .catch(e => console.log(e))
         },
-        nextPage:function() {
-            // if((this.currentPage*this.rowsPerPage) < this.users.length) this.currentPage++;
-            // if(this.currentPage > 1) this.currentPage--;
-        },
         goToPersonAlbum (userId) {
-            // fetch(`https://jsonplaceholder.typicode.com/users/${userId}/albums`)
-            //     .then((response) => response.json())
-            //     .then((json) => console.log(json));
-            this.$router.push({name: 'Albums', params: {userId}}).then(r => console.log(r));
-         }
+            this.$router.push({name: 'Albums', params: {userId: userId}})
+                .then(r => r.params);
+         },
+        calculatePages () {
+            let numberOfPages = Math.ceil(this.users.length / this.rowsPerPage);
+            for (let index = 1; index <= numberOfPages; index++) {
+                this.pages.push(index);
+            }
+        },
+        paginate (users) {
+            let page = this.currentPage;
+            let perPage = this.rowsPerPage;
+            let from = (page * perPage) - perPage;
+            let to = (page * perPage);
+            return  users.slice(from, to);
+        },
+        sortBy (key) {
+            this.sort.isAsc = this.sort.key === key ? !this.sort.isAsc : false;
+            this.sort.key = key;
+        }
     },
 
-    mounted() {
+    created() {
         this.getUsers();
     },
 }
