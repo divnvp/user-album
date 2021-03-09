@@ -10,8 +10,8 @@ const routes = [
     name: 'Home',
     component: Home,
     query: {
-      page: null,
-      size: null
+      page: '',
+      size: '',
     }
   },
   {
@@ -19,9 +19,8 @@ const routes = [
     name: 'Albums',
     component: () => import('../components/albums/UserAlbum.vue'),
     query: {
-      page: null,
-      size: null,
-      userId: null,
+      page: '',
+      size: '',
     }
   },
   {
@@ -29,10 +28,9 @@ const routes = [
     name: 'Photos',
     component: () => import('../components/photos/AlbumPhoto.vue'),
     query: {
-      albumId: null,
-      fullscreen: null,
-      page: null,
-      size: null
+      fullscreen: '',
+      page: '',
+      size: '',
     }
   },
 ]

@@ -24,9 +24,8 @@ function getUserAlbumQuery (userId, page, size) {
 }
 
 function getPhotosQuery (albumId, fullscreen, page, size) {
-    return fetch(`https://jsonplaceholder.typicode.com/albums/${albumId}/photos?fullscreen=${fullscreen}?page=${page}&size=${size}`)
+    return fetch(`https://jsonplaceholder.typicode.com/albums/${albumId}/photos?page=${page}&size=${size}?fullscreen=${fullscreen}`)
         .then((response) => response.json())
 }
 
 export { getUsers, getPhotos, getUserAlbum, getUsersQuery, getUserAlbumQuery, getPhotosQuery }
-

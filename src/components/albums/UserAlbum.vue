@@ -2,7 +2,7 @@
   <div>
 
     <header>
-      <button @click="$router.push({name: 'Home'})">
+      <button @click="$router.push({name: 'Home', query: {page: $route.query.page, size: $route.query.size}})">
         Назад
       </button>
       {{$route.query.userId}}
@@ -16,7 +16,7 @@
         <tbody>
         <tr v-for="album in displayedAlbums"
             :key="album.id"
-            @click="goToPhoto(album.id, currentPage, rowsPerPage)"
+            @click="goToPhoto(album.id, $route.query.page, $route.query.size)"
             class="cursor-pointer">
           {{album.title}}
         </tr>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import {getUserAlbum, getUserAlbumQuery} from '@/services/api.service'
+import {getUserAlbumQuery} from '@/services/api.service'
 export default {
   name: 'UserAlbum',
   data () {
@@ -60,19 +60,8 @@ export default {
     },
   },
 
-  //Если нужные параметры есть,
-  // то в хуке жизненного цикла created() присвоить эти значения
-  // в инициализированные переменные объекта data() {}
-
-  //Выполныть необходимые запросы с сервера, путем вызова соответсвующих методов из сервиса с описание API
   async created() {
-    if (this.linkExist()) {
-      this.currentPage = this.$route.query.page;
-      this.rowsPerPage = this.$route.query.size;
       this.albums = await getUserAlbumQuery(this.$route.query.userId, this.currentPage, this.rowsPerPage)
-    } else {
-      this.albums = await getUserAlbum(this.$route.query.userId);
-    }
   },
 
   methods: {
@@ -92,10 +81,6 @@ export default {
       let to = (page * perPage);
       return  users.slice(from, to);
     },
-    //Проверить наличие URL адреса на необходимые query параметры
-    linkExist() {
-      return !(this.$route.query.page === undefined && this.$route.query.size === undefined);
-    }
   },
 }
 </script>

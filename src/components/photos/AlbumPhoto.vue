@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <button @click="goToBack()">
+      <button @click="$router.push({name: 'Home', query: {page: $route.query.page, size: $route.query.size}})">
         Назад
       </button>
       {{albumId}}
@@ -62,7 +62,7 @@ export default {
 
   data () {
     return {
-      albumId: this.$route.params.albumId,
+      albumId: this.$route.query.albumId,
       photos: [],
       pages: [],
       currentPage: 1,
@@ -81,25 +81,15 @@ export default {
     photos () {
       this.calculatePages();
     },
-    currentPage () {
-      this.linkExist(this.currentPage, this.rowsPerPage);
-    },
+    showModal () {
+      if (this.showModal !== null) {
+        getPhotosQuery(this.$route.query.albumId, this.showModal, this.currentPage, this.rowsPerPage);
+      }
+    }
   },
 
-  //Если нужные параметры есть,
-  // то в хуке жизненного цикла created() присвоить эти значения
-  // в инициализированные переменные объекта data() {}
-
-  //Выполныть необходимые запросы с сервера, путем вызова соответсвующих методов из сервиса с описание API
   async created() {
-    if (this.linkExist()) {
-      this.photos.url = this.$route.query.fullscreen;
-      this.currentPage = this.$route.query.page;
-      this.rowsPerPage = this.$route.query.size;
-      this.photos = await getPhotosQuery(this.$route.params.albumId, this.photos.url, this.currentPage, this.rowsPerPage);
-    } else {
-      this.photos = await getPhotos(this.$route.params.albumId);
-    }
+      this.photos = await getPhotos(this.$route.query.albumId);
   },
 
   methods: {
@@ -116,18 +106,6 @@ export default {
       let to = (page * perPage);
       return  users.slice(from, to);
     },
-    goToBack () {
-      this.$router.push({name: 'Home',
-        query: (route) => ({
-          page: route.query.page,
-          size: route.query.size})
-      })
-    },
-    //Проверить наличие URL адреса на необходимые query параметры
-    linkExist() {
-      return !(this.$route.query.page === undefined && this.$route.query.size === undefined
-          && this.$route.query.fullscreen);
-    }
   },
 }
 </script>

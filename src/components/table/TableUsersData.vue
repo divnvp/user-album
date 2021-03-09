@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import {getUsers, getUsersQuery} from "@/services/api.service";
+import {getUsersQuery} from "@/services/api.service";
 export default {
   name: 'TableUsersData',
   data () {
@@ -84,19 +84,10 @@ export default {
     },
   },
 
-  //Если нужные параметры есть,
-  // то в хуке жизненного цикла created() присвоить эти значения
-  // в инициализированные переменные объекта data() {}
-
-  //Выполныть необходимые запросы с сервера, путем вызова соответсвующих методов из сервиса с описание API
   async created() {
-    if (this.linkExist()) {
-      this.currentPage = this.$route.query.page;
-      this.rowsPerPage = this.$route.query.size;
-      this.users = await getUsersQuery(this.currentPage, this.rowsPerPage)
-    } else {
-      this.users = await getUsers()
-    }
+    this.currentPage = this.$route.query.page;
+    this.rowsPerPage = this.$route.query.size;
+    this.users = await getUsersQuery(this.currentPage, this.rowsPerPage)
   },
 
   methods: {
@@ -109,21 +100,10 @@ export default {
         this.pages.push(index);
       }
     },
-    paginate (users) {
-      let page = this.currentPage;
-      let perPage = this.rowsPerPage;
-      let from = (page * perPage) - perPage;
-      let to = (page * perPage);
-      return  users.slice(from, to);
-    },
     sortBy (key) {
       this.sort.isAsc = this.sort.key === key ? !this.sort.isAsc : false;
       this.sort.key = key;
     },
-    //Проверить наличие URL адреса на необходимые query параметры
-    linkExist() {
-      return !(this.$route.query.page === undefined && this.$route.query.size === undefined);
-    }
   },
 }
 </script>
