@@ -41,7 +41,9 @@
 </template>
 
 <script>
-import {getUsers} from "@/services/api.service";
+import { getUsers } from "@/services/api.service";
+import { createPagiable } from "@/utils";
+
 export default {
   name: 'TableUsersData',
   data () {
@@ -69,12 +71,9 @@ export default {
         return (a === b ? 0 : a > b ? 1 : -1) * (this.sort.isAsc ? 1 : -1)
       });
     },
+    
     pagiabledUsers () {
-      let page = this.currentPage;
-      let perPage = this.rowsPerPage;
-      let from = (page * perPage) - perPage;
-      let to = (page * perPage);
-      return this.users.slice(from, to);
+      return createPagiable(this.users, this.currentPage, this.rowsPerPage);
     }
   },
 
@@ -85,7 +84,7 @@ export default {
   },
 
   async created() {
-    this.users = await getUsers(this.currentPage, this.rowsPerPage)
+    this.users = await getUsers()
   },
 
   methods: {

@@ -3,15 +3,14 @@ function getUserAlbum (userId) {
         .then((response) => response.json())
 }
 
-function getPhotos (albumId, fullscreenUrl) {
-    return fetch(`https://jsonplaceholder.typicode.com/albums/${albumId}/photos?fullscreen=${fullscreenUrl}`)
+function getPhotos (albumId) {
+    return fetch(`https://jsonplaceholder.typicode.com/albums/${albumId}/photos`)
         .then((response) => response.json())
 }
 
-function getUsers(currentPage, rowsPerPage) {
-    return fetch(`https://jsonplaceholder.typicode.com/users?page=${currentPage}&size=${rowsPerPage}`)
+function getUsers() {
+    return fetch(`https://jsonplaceholder.typicode.com/users`)
         .then(response => response.json())
 }
 
 export { getUsers, getPhotos, getUserAlbum }
-

@@ -9,7 +9,7 @@
     </header>
 
     <main>
-      <table>
+      <table class="album-table">
         <thead>
         <th>title</th>
         </thead>
@@ -36,7 +36,9 @@
 </template>
 
 <script>
-import {getUserAlbum} from '@/services/api.service'
+import { getUserAlbum } from '@/services/api.service';
+import { createPagiable } from '@/utils';
+
 export default {
   name: 'UserAlbum',
   data () {
@@ -50,7 +52,7 @@ export default {
 
   computed: {
     displayedAlbums () {
-      return this.paginate(this.albums);
+      return createPagiable(this.photos, this.currentPage, this.rowsPerPage);
     }
   },
 
@@ -68,24 +70,18 @@ export default {
     async goToPhoto (albumId) {
       await this.$router.push({name: 'Photos', params: {albumId: albumId}});
     },
+
     calculatePages () {
       let numberOfPages = Math.ceil(this.albums.length / this.rowsPerPage);
       for (let index = 1; index <= numberOfPages; index++) {
         this.pages.push(index);
       }
     },
-    paginate (users) {
-      let page = this.currentPage;
-      let perPage = this.rowsPerPage;
-      let from = (page * perPage) - perPage;
-      let to = (page * perPage);
-      return  users.slice(from, to);
-    }
   },
 }
 </script>
 
-<style>
+<style scoped>
 table {
   table-layout: fixed;
   width: 100%;

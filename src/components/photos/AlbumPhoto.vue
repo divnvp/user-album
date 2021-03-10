@@ -1,110 +1,130 @@
 <template>
   <div>
     <header>
-      <button @click="$router.push({name: 'Home'})">
+      <button @click="$router.push({ name: 'Home' })">
         Назад
       </button>
-      {{albumId}}
+      {{ albumId }}
     </header>
 
     <main>
       <table>
         <thead>
-        <th>image</th>
+          <th>image</th>
         </thead>
         <tbody>
-        <tr
+          <tr
             v-for="photo in displayedPhotos"
             :key="photo.id"
-            class="cursor-pointer">
-          <td>
-            <img :src="photo.thumbnailUrl"
-                 @click="showModal = photo.id">
-            <info-modal-photo v-if="showModal === photo.id">
-              <template #header>
-                <h3>{{photo.id}}</h3>
-              </template>
-              <template #body>
-                <h3>title: {{photo.title}}</h3>
-                <img :src="photo.url">
-              </template>
-              <template #footer>
-                <button @click="showModal = null">
-                  X
-                </button>
-              </template>
-            </info-modal-photo>
-          </td>
-        </tr>
+            class="cursor-pointer"
+          >
+            <td>
+              <img
+                :src="photo.thumbnailUrl"
+                @click="showPhotoFullscreen(photo.url)"
+              />
+            </td>
+          </tr>
         </tbody>
       </table>
     </main>
 
+    <info-modal-photo v-if="showModal === true">
+      <template #body>
+        <img :src="fullscreenUrl" />
+      </template>
+      <template #footer>
+        <button @click="closePhotoFullscreen">x</button>
+      </template>
+    </info-modal-photo>
+
     <footer>
-      <button v-for="pageNumber in pages"
-              @click="currentPage = pageNumber"
-              :key="pageNumber">
-        {{pageNumber}}
+      <button
+        v-for="pageNumber in pages"
+        @click="currentPage = pageNumber"
+        :key="pageNumber"
+      >
+        {{ pageNumber }}
       </button>
     </footer>
-
   </div>
 </template>
 
 <script>
-import InfoModalPhoto from './InfoModalPhoto'
-import {getPhotos} from '@/services/api.service'
+import { getPhotos } from "@/services/api.service";
+import { createPagiable } from "@/utils";
+
+import InfoModalPhoto from "./InfoModalPhoto";
+
 export default {
-  name: 'AlbumPhoto',
+  name: "AlbumPhoto",
   components: {
     InfoModalPhoto,
   },
 
-  data () {
+  data() {
     return {
       albumId: this.$route.params.albumId,
       photos: [],
       pages: [],
       currentPage: 1,
       rowsPerPage: 9,
-      showModal: null,
-    }
+      showModal: false,
+      fullscreenUrl: "",
+    };
   },
 
   computed: {
-    displayedPhotos () {
-      return this.paginate(this.photos);
-    }
+    displayedPhotos() {
+      return createPagiable(this.photos, this.currentPage, this.rowsPerPage);
+    },
   },
 
   watch: {
-    photos () {
+    photos() {
       this.calculatePages();
-    }
+    },
   },
 
   async created() {
-    // this.photos.url = this.$route.query.fullscreenUrl;
-    this.photos = await getPhotos(this.$route.params.albumId, this.photos.url);
+    this.photos = await getPhotos(this.$route.params.albumId);
 
+    if (this.$route.query && this.$route.query.fullscreenUrl) {
+      this.fullscreenUrl = this.$route.query.fullscreenUrl;
+      this.showModal = true;
+    }
   },
 
   methods: {
-    calculatePages () {
+    calculatePages() {
       let numberOfPages = Math.ceil(this.photos.length / this.rowsPerPage);
       for (let index = 1; index <= numberOfPages; index++) {
         this.pages.push(index);
       }
     },
-    paginate (users) {
-      let page = this.currentPage;
-      let perPage = this.rowsPerPage;
-      let from = (page * perPage) - perPage;
-      let to = (page * perPage);
-      return  users.slice(from, to);
-    }
+
+    async showPhotoFullscreen(url) {
+      if (!url) {
+        return;
+      }
+
+      await this.$router.replace({
+        ...this.$route,
+        query: {
+          fullscreenUrl: url,
+        },
+      });
+
+      this.fullscreenUrl = url;
+      this.showModal = true;
+    },
+
+    async closePhotoFullscreen() {
+      await this.$router.replace({ ...this.$route, query: {} });
+      this.showModal = false;
+    },
   },
-}
+};
 </script>
 
 <style>
@@ -118,8 +138,7 @@ thead {
   border: 3px solid black;
 }
 
-.cursor-pointer{
+.cursor-pointer {
   cursor: pointer;
 }
-
 </style>
